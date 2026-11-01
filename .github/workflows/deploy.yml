@@ -32,7 +32,10 @@ jobs:
             coverage
           retention-days: 7
   deploy-staging:
-    if: vars.NETLIFY_ENABLED == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    if: >-
+      vars.NETLIFY_ENABLED == 'true' &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/develop'
     needs: build-and-test
     runs-on: ubuntu-latest
     environment: staging
@@ -61,9 +64,15 @@ jobs:
           webhook: ${{ secrets.SLACK_WEBHOOK }}
           webhook-type: incoming-webhook
           payload: |
-            text: "staging | ${{ job.status }} | ${{ github.sha }} | ${{ github.actor }} | ${{ steps.netlify.outputs.deploy-url }}"
+            text: >-
+              staging | ${{ job.status }} | ${{ github.sha }}
+              | ${{ github.actor }}
+              | ${{ steps.netlify.outputs.deploy-url }}
   deploy-production:
-    if: vars.NETLIFY_ENABLED == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: >-
+      vars.NETLIFY_ENABLED == 'true' &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main'
     needs: build-and-test
     runs-on: ubuntu-latest
     environment: production
@@ -92,7 +101,10 @@ jobs:
           webhook: ${{ secrets.SLACK_WEBHOOK }}
           webhook-type: incoming-webhook
           payload: |
-            text: "production | ${{ job.status }} | ${{ github.sha }} | ${{ github.actor }} | ${{ steps.netlify.outputs.deploy-url }}"
+            text: >-
+              production | ${{ job.status }} | ${{ github.sha }}
+              | ${{ github.actor }}
+              | ${{ steps.netlify.outputs.deploy-url }}
       - name: Read package version
         id: version
         run: node -e 'console.log("version="+require("./package.json").version)' >> "$GITHUB_OUTPUT"
