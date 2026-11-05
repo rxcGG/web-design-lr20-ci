@@ -23,7 +23,7 @@ jobs:
         env:
           REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
           REACT_APP_ANALYTICS_ID: ${{ secrets.REACT_APP_ANALYTICS_ID }}
-          REACT_APP_ENV: ${{ secrets.REACT_APP_ENV }}
+          REACT_APP_ENV: ${{ github.ref == 'refs/heads/develop' && 'staging' || secrets.REACT_APP_ENV }}
       - uses: actions/upload-artifact@v4
         with:
           name: react-build-and-coverage
@@ -33,7 +33,6 @@ jobs:
           retention-days: 7
   deploy-staging:
     if: >-
-      vars.NETLIFY_ENABLED == 'true' &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/develop'
     needs: build-and-test
@@ -49,7 +48,7 @@ jobs:
         id: netlify
         with:
           publish-dir: output/dist
-          production-deploy: false
+          production-deploy: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
           deploy-message: "Staging ${{ github.sha }}"
           enable-commit-comment: false
@@ -70,7 +69,6 @@ jobs:
               | ${{ steps.netlify.outputs.deploy-url }}
   deploy-production:
     if: >-
-      vars.NETLIFY_ENABLED == 'true' &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main'
     needs: build-and-test
@@ -117,4 +115,6 @@ jobs:
           generate_release_notes: true
           files: |
             output/dist/**
-            output/coverage/**
+            output/coverage/coverage-final.json
+            output/coverage/lcov.info
+            output/coverage/clover.xml
