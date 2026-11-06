@@ -1,0 +1,23 @@
+name: Перевірка сповіщень Slack
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        status: [success, failure]
+      max-parallel: 1
+    steps:
+      - uses: slackapi/slack-github-action@v4.0.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: >-
+              Тест сповіщення ЛР20: ${{ matrix.status }}
+              | production | ${{ github.sha }}
+              | ${{ github.actor }}
+              | https://web-design-lr20-production-rxcgg.netlify.app
